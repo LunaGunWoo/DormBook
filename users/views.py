@@ -1,5 +1,5 @@
 from django.contrib.auth import login, authenticate, logout
-from rest_framework import generics, permissions, status
+from rest_framework import generics, permissions, status, views
 from rest_framework.response import Response
 from .serializers import *
 from .models import *
@@ -26,6 +26,7 @@ class ChangePasswordAPIView(generics.UpdateAPIView):
 
             self.object.set_password(serializer.data.get("new_password"))
             self.object.save()
+            login(request=request, user=self.object)
             return Response(
                 {"detail": "Password updated successfully."},
                 status=status.HTTP_200_OK,
@@ -39,6 +40,7 @@ class ChangePasswordAPIView(generics.UpdateAPIView):
 
 class LogInAPIView(generics.GenericAPIView):
     serializer_class = LoginSerializer
+    model = User
 
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
@@ -58,3 +60,11 @@ class LogInAPIView(generics.GenericAPIView):
             return Response(
                 {"detail": "로그인 실패"}, status=status.HTTP_401_UNAUTHORIZED
             )
+
+
+class LogOutAPIView(views.APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def post(self, request):
+        logout(request=request)
+        return Response({"detail": "로그아웃 성공"}, status=status.HTTP_200_OK)
