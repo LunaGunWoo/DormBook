@@ -1,7 +1,5 @@
-from django.contrib.auth import authenticate
 from django.core.validators import RegexValidator
 from rest_framework import serializers
-from .models import User
 
 
 class ChangePasswordSerializer(serializers.Serializer):
