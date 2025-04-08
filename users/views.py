@@ -5,7 +5,7 @@ from .serializers import *
 from .models import *
 
 
-class ChangePasswordAPIView(generics.UpdateAPIView):
+class ChangePasswordAPIView(generics.GenericAPIView):
     serializer_class = ChangePasswordSerializer
     model = User
     permission_classes = (permissions.IsAuthenticated,)
@@ -13,7 +13,7 @@ class ChangePasswordAPIView(generics.UpdateAPIView):
     def get_object(self, queryset=None):
         return self.request.user
 
-    def update(self, request, *args, **kwargs):
+    def put(self, request, *args, **kwargs):
         self.object = self.get_object()
         serializer = self.get_serializer(data=request.data)
 
