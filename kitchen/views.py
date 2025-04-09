@@ -21,7 +21,29 @@ class InductionTimeSlotListAPIView(generics.ListAPIView):
 
     def get_queryset(self):
         induction_pk = self.kwargs.get("pk")
-        return InductionTimeSlot.objects.filter(induction__pk=induction_pk)
+        queryset = InductionTimeSlot.objects.filter(induction__pk=induction_pk)
+
+        from_now_on = self.request.GET.get("from_now_on", "0")
+        try:
+            from_now_on = int(from_now_on)
+        except ValueError:
+            from_now_on = 0
+        now_date = timezone.localtime(
+            timezone.now(), timezone=timezone.get_fixed_timezone(540)
+        ).date()
+        queryset = queryset.filter(
+            start_time__gte=timezone.make_aware(
+                datetime.combine(now_date, datetime.min.time()),
+                timezone=timezone.get_fixed_timezone(540),
+            )
+            + timedelta(days=from_now_on),
+            start_time__lt=timezone.make_aware(
+                datetime.combine(now_date, datetime.min.time()),
+                timezone=timezone.get_fixed_timezone(540),
+            )
+            + timedelta(days=from_now_on + 1),
+        )
+        return queryset
 
 
 class InductionTimeSlotBookAPIView(generics.GenericAPIView):
