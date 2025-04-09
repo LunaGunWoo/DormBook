@@ -1,5 +1,7 @@
 from rest_framework import permissions, status, generics
 from rest_framework.response import Response
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 from .serializers import *
 from .models import *
 
@@ -18,6 +20,20 @@ class InductionListAPIView(generics.ListAPIView):
 class InductionTimeSlotListAPIView(generics.ListAPIView):
     serializer_class = ListInductionTimeSlotSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter(
+                "from_now_on",
+                openapi.IN_QUERY,
+                description="현재로부터 몇일 후의 시간슬롯을 조회할지 지정 (기본값: 0)",
+                type=openapi.TYPE_INTEGER,
+                required=False,
+            )
+        ]
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
 
     def get_queryset(self):
         induction_pk = self.kwargs.get("pk")
