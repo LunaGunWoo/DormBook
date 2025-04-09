@@ -8,5 +8,4 @@ class InductionSerializer(serializers.ModelSerializer):
         fields = [
             "pk",
             "is_available",
-            "is_free_use",
         ]
