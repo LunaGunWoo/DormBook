@@ -47,7 +47,7 @@ class InductionTimeSlot(models.Model):
 
         open_at = 0
         close_at = 24
-        unit_minute = 60
+        unit_minute = 30
 
         for induction in Induction.objects.filter(is_available=True):
             current_date = start_date
