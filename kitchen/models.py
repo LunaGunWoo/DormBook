@@ -38,11 +38,16 @@ class InductionTimeSlot(models.Model):
 
     def __str__(self):
         status = "예약됨" if self.user else "가능"
-        return f"{self.induction} - {self.start_time.strftime("%Y-%m-%d %H:%M")} ({status})"
+        start_time_seoul = timezone.localtime(
+            self.start_time, timezone=timezone.get_fixed_timezone(540)
+        )
+        return f"{self.induction} - {start_time_seoul.strftime('%Y-%m-%d %H:%M')} ({status})"
 
     @classmethod
     def create_time_slots(cls, days=7):
-        start_date = timezone.now().date()
+        start_date = timezone.localtime(
+            timezone.now(), timezone=timezone.get_fixed_timezone(540)
+        ).date()
         end_date = start_date + timedelta(days=days)
 
         open_at = 0
@@ -53,11 +58,13 @@ class InductionTimeSlot(models.Model):
             current_date = start_date
             while current_date < end_date:
                 current_time = timezone.make_aware(
-                    datetime.combine(current_date, datetime.min.time())
+                    datetime.combine(current_date, datetime.min.time()),
+                    timezone=timezone.get_fixed_timezone(540),
                 ) + timedelta(hours=open_at)
 
                 end_time = timezone.make_aware(
-                    datetime.combine(current_date, datetime.min.time())
+                    datetime.combine(current_date, datetime.min.time()),
+                    timezone=timezone.get_fixed_timezone(540),
                 ) + timedelta(hours=close_at)
 
                 while current_time < end_time:

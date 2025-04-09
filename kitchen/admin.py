@@ -47,3 +47,8 @@ class InductionTimeSlotAdmin(admin.ModelAdmin):
         IsBookedFilter,
         "induction",
     ]
+    readonly_fields = (
+        "start_time",
+        "end_time",
+        "booked_at",
+    )
