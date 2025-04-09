@@ -70,3 +70,14 @@ class InductionTimeSlot(models.Model):
                     current_time = slot_end_time
 
                 current_date += timedelta(days=1)
+
+    def book(self, user):
+        if self.user:
+            raise ValueError("이미 예약된 시간입니다.")
+        self.user = user
+        self.booked_at = timezone.now()
+        self.save()
+
+    @property
+    def is_booked(self) -> bool:
+        return True if self.user else False
