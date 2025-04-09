@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.http import HttpRequest
 from .models import Induction, InductionTimeSlot
 
 
@@ -12,9 +13,7 @@ def change_is_available(modeladmin, request, inductions):
 @admin.register(Induction)
 class InductionAdmin(admin.ModelAdmin):
 
-    actions = [
-        change_is_available,
-    ]
+    actions = [change_is_available]
 
     list_display = (
         "pk",
@@ -24,6 +23,9 @@ class InductionAdmin(admin.ModelAdmin):
 
 @admin.register(InductionTimeSlot)
 class InductionTimeSlotAdmin(admin.ModelAdmin):
+    def has_add_permission(self, request: HttpRequest) -> bool:
+        return False
+
     list_filter = [
         "induction",
         "start_time",
