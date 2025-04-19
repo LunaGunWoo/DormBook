@@ -9,7 +9,7 @@ urlpatterns = [
         name="induction-timeslot list",
     ),
     path(
-        "inductions/<int:timeslot_pk>/book/",
+        "inductions/<int:pk>/book/",
         InductionTimeSlotBookAPIView.as_view(),
         name="induction-timeslot book",
     ),

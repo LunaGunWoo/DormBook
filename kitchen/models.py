@@ -1,8 +1,6 @@
 from django.db import models
-from django.core.exceptions import ValidationError
 from django.utils import timezone
 from users.models import User
-from datetime import datetime, timedelta
 
 
 class Induction(models.Model):
@@ -12,7 +10,7 @@ class Induction(models.Model):
     )
 
     def __str__(self) -> str:
-        return str(self.pk)
+        return f"Induction {self.pk}"
 
 
 class InductionTimeSlot(models.Model):
@@ -37,46 +35,15 @@ class InductionTimeSlot(models.Model):
         unique_together = ["induction", "start_time"]
 
     def __str__(self):
-        status = "예약됨" if self.user else "가능"
-        start_time_seoul = timezone.localtime(
-            self.start_time, timezone=timezone.get_fixed_timezone(540)
-        )
-        return f"{self.induction} - {start_time_seoul.strftime('%Y-%m-%d %H:%M')} ({status})"
-
-    @classmethod
-    def create_time_slots(cls, days=7):
-        start_date = timezone.localtime(
-            timezone.now(), timezone=timezone.get_fixed_timezone(540)
-        ).date()
-        end_date = start_date + timedelta(days=days)
-
-        open_at = 0
-        close_at = 24
-        unit_minute = 30
-
-        for induction in Induction.objects.filter(is_available=True):
-            current_date = start_date
-            while current_date < end_date:
-                current_time = timezone.make_aware(
-                    datetime.combine(current_date, datetime.min.time()),
-                    timezone=timezone.get_fixed_timezone(540),
-                ) + timedelta(hours=open_at)
-
-                end_time = timezone.make_aware(
-                    datetime.combine(current_date, datetime.min.time()),
-                    timezone=timezone.get_fixed_timezone(540),
-                ) + timedelta(hours=close_at)
-
-                while current_time < end_time:
-                    slot_end_time = current_time + timedelta(minutes=unit_minute)
-                    cls.objects.get_or_create(
-                        induction=induction,
-                        start_time=current_time,
-                        end_time=slot_end_time,
-                    )
-                    current_time = slot_end_time
-
-                current_date += timedelta(days=1)
+        status = "Booked" if self.user else "Available (Created)"
+        try:
+            start_time_seoul = timezone.localtime(
+                self.start_time, timezone=timezone.get_fixed_timezone(540),
+            )
+            user_info = f" by {self.user.student_id_number}" if self.user else ""
+            return f"{self.induction} - {start_time_seoul.strftime('%Y-%m-%d %H:%M')} ({status}{user_info})"
+        except AttributeError:
+            return f"InductionTimeSlot object (Incomplete)"
 
     def book(self, user):
         if self.user:
@@ -87,4 +54,4 @@ class InductionTimeSlot(models.Model):
 
     @property
     def is_booked(self) -> bool:
-        return True if self.user else False
+        return self.user is not None
