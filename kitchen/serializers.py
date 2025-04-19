@@ -14,14 +14,12 @@ class InductionSerializer(serializers.ModelSerializer):
 
 
 class ListInductionTimeSlotSerializer(serializers.ModelSerializer):
-    user = serializers.StringRelatedField()
 
     class Meta:
         model = InductionTimeSlot
         fields = [
             "pk",
             "induction",
-            "user",
             "is_booked",
             "start_time",
             "end_time",
