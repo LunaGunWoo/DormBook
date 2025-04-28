@@ -33,6 +33,7 @@ ALLOWED_HOSTS = []
 CUSTOM_APPS = [
     "users.apps.UsersConfig",
     "kitchen.apps.KitchenConfig",
+    "lounge.apps.LoungeConfig",
 ]
 
 THIRD_PARTY_APPS = [
