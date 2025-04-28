@@ -36,6 +36,10 @@ class InductionTimeSlotListAPIView(generics.ListAPIView):
         return super().get(request, *args, **kwargs)
 
     def get_queryset(self):
+        if getattr(self, "swagger_fake_view", False):
+            if not self.request.query_params.get("date"):
+                return InductionTimeSlot.objects.none()
+
         induction_pk = self.kwargs.get("pk")
         date_str = self.request.query_params.get("date")
 
@@ -64,6 +68,7 @@ class InductionTimeSlotListAPIView(generics.ListAPIView):
 
 
 class InductionTimeSlotBookAPIView(generics.GenericAPIView):
+    queryset = InductionTimeSlot.objects.none()
     serializer_class = BookInductionTimeSlotSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -73,10 +78,10 @@ class InductionTimeSlotBookAPIView(generics.GenericAPIView):
             200: openapi.Response("예약 성공", ListInductionTimeSlotSerializer),
             201: openapi.Response(
                 "예약 및 슬롯 생성 성공", ListInductionTimeSlotSerializer
-            ),  # 새로 생성된 경우 201
+            ),
             400: "잘못된 요청 (입력 값 오류, 사용 불가 인덕션, 이미 예약됨 등)",
             404: "인덕션을 찾을 수 없음",
-            409: "동시 예약 시도 충돌 (Conflict)",  # 동시성 문제 발생 시
+            409: "동시 예약 시도 충돌 (Conflict)",
             500: "서버 내부 오류",
         },
     )
