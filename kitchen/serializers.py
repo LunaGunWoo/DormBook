@@ -25,6 +25,14 @@ class ListInductionTimeSlotSerializer(serializers.ModelSerializer):
             "end_time",
             "booked_at",
         ]
+        read_only_fields = [
+            "pk",
+            "induction",
+            "is_booked",
+            "start_time",
+            "end_time",
+            "booked_at",
+        ]
 
 
 class BookInductionTimeSlotSerializer(serializers.Serializer):
