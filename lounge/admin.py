@@ -53,10 +53,20 @@ class PingPongTableTimeSlotAdmin(admin.ModelAdmin):
         "ping_pong_table",
     ]
     readonly_fields = (
+        "user",
         "start_time",
         "end_time",
         "booked_at",
     )
+    list_display = (
+        "__str__",
+        "ping_pong_table",
+        "user",
+        "start_time",
+        "end_time",
+        "is_booked",
+    )
+    search_fields = ("user__student_id_number",)
 
 
 @admin.register(ArcadeMachine)
