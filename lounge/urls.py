@@ -17,4 +17,19 @@ urlpatterns = [
         PingPongTableTimeSlotBookAPIView.as_view(),
         name="ping-pong-table-timeslot-book",
     ),
+    path(
+        "arcade-machines/",
+        ArcadeMachineListAPIView.as_view(),
+        name="arcade-machine-list",
+    ),
+    path(
+        "arcade-machines/<int:pk>/timeslots/",
+        ArcadeMachineTimeSlotListAPIView.as_view(),
+        name="arcade-machine-timeslot-list",
+    ),
+    path(
+        "arcade-machines/<int:pk>/book/",
+        ArcadeMachineTimeSlotBookAPIView.as_view(),
+        name="arcade-machine-timeslot-book",
+    ),
 ]
