@@ -12,7 +12,7 @@ class BaseMachineSerializer(serializers.ModelSerializer):
     class Meta:
         fields = [
             "pk",
-            "name",
+            "is_using",
             "is_available",
         ]
 

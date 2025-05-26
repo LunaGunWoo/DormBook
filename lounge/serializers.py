@@ -17,6 +17,7 @@ class PingPongTableSerializer(serializers.ModelSerializer):
         model = PingPongTable
         fields = [
             "pk",
+            "is_using",
             "is_available",
         ]
 
@@ -118,6 +119,7 @@ class ArcadeMachineSerializer(serializers.ModelSerializer):
         model = ArcadeMachine
         fields = [
             "pk",
+            "is_using",
             "is_available",
         ]
 

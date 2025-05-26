@@ -9,6 +9,13 @@ class Induction(models.Model):
         default=True,
     )
 
+    @property
+    def is_using(self) -> bool:
+        now = timezone.now()
+        return InductionTimeSlot.objects.filter(
+            induction=self, start_time__lte=now, end_time__gt=now, user__isnull=False
+        ).exists()
+
     def __str__(self) -> str:
         return f"Induction {self.pk}"
 
@@ -38,7 +45,8 @@ class InductionTimeSlot(models.Model):
         status = "Booked" if self.user else "Available (Created)"
         try:
             start_time_seoul = timezone.localtime(
-                self.start_time, timezone=timezone.get_fixed_timezone(540),
+                self.start_time,
+                timezone=timezone.get_fixed_timezone(540),
             )
             user_info = f" by {self.user.student_id_number}" if self.user else ""
             return f"{self.induction} - {start_time_seoul.strftime('%Y-%m-%d %H:%M')} ({status}{user_info})"

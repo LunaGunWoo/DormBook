@@ -12,6 +12,7 @@ class InductionSerializer(serializers.ModelSerializer):
         model = Induction
         fields = [
             "pk",
+            "is_using",
             "is_available",
         ]
 

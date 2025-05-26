@@ -8,7 +8,6 @@ class Machine(models.Model):
     공통적인 기계 특성을 위한 추상 기본 모델
     """
 
-    name = models.CharField("기구명", max_length=100, unique=True)
     is_available = models.BooleanField(
         "사용 가능 여부",
         default=True,
@@ -18,7 +17,7 @@ class Machine(models.Model):
         abstract = True
 
     def __str__(self) -> str:
-        return self.name
+        return self.pk
 
 
 class TimeSlot(models.Model):
@@ -47,7 +46,12 @@ class TimeSlot(models.Model):
 
 
 class Treadmill(Machine):
-    pass
+    @property
+    def is_using(self) -> bool:
+        now = timezone.now()
+        return TreadmillTimeSlot.objects.filter(
+            treadmill=self, start_time__lte=now, end_time__gt=now, user__isnull=False
+        ).exists()
 
 
 class TreadmillTimeSlot(TimeSlot):
@@ -74,7 +78,15 @@ class TreadmillTimeSlot(TimeSlot):
 
 
 class Cycle(Machine):
-    pass
+    @property
+    def is_using(self) -> bool:
+        now = timezone.now()
+        return CycleTimeSlot.objects.filter(
+            cycle=self,
+            start_time__lte=now,
+            end_time__gt=now,
+            user__isnull=False,
+        ).exists()
 
 
 class CycleTimeSlot(TimeSlot):

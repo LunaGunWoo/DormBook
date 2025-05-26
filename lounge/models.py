@@ -9,6 +9,16 @@ class PingPongTable(models.Model):
         default=True,
     )
 
+    @property
+    def is_using(self) -> bool:
+        now = timezone.now()
+        return PingPongTableTimeSlot.objects.filter(
+            ping_pong_table=self,
+            start_time__lte=now,
+            end_time__gt=now,
+            user__isnull=False,
+        ).exists()
+
     def __str__(self) -> str:
         return f"ping pong table {self.pk}"
 
@@ -64,6 +74,16 @@ class ArcadeMachine(models.Model):
         default=True,
     )
 
+    @property  #
+    def is_using(self) -> bool:
+        now = timezone.now()
+        return ArcadeMachineTimeSlot.objects.filter(
+            arcade_machine=self,
+            start_time__lte=now,
+            end_time__gt=now,
+            user__isnull=False,
+        ).exists()
+
     def __str__(self) -> str:
         return f"Arcade Machine {self.pk}"
 
@@ -87,14 +107,14 @@ class ArcadeMachineTimeSlot(models.Model):
 
     class Meta:
         ordering = ["start_time"]
-        unique_together = ["arcade_machine", "start_time"]  # 필드명 변경
+        unique_together = ["arcade_machine", "start_time"]
 
     def __str__(self):
         status = "Booked" if self.user else "Available (Created)"
         try:
             start_time_seoul = timezone.localtime(
                 self.start_time,
-                timezone=timezone.get_fixed_timezone(540),  # KST (UTC+9)
+                timezone=timezone.get_fixed_timezone(540),
             )
             user_info = f" by {self.user.student_id_number}" if self.user else ""
             return f"{self.arcade_machine} - {start_time_seoul.strftime('%Y-%m-%d %H:%M')} ({status}{user_info})"
