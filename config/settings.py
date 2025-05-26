@@ -34,6 +34,7 @@ CUSTOM_APPS = [
     "users.apps.UsersConfig",
     "kitchen.apps.KitchenConfig",
     "lounge.apps.LoungeConfig",
+    "gym.apps.GymConfig",
 ]
 
 THIRD_PARTY_APPS = [
