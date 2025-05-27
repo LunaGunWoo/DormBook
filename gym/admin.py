@@ -12,7 +12,10 @@ def toggle_availability(modeladmin, request, queryset):
 
 class MachineAdmin(admin.ModelAdmin):
     actions = [toggle_availability]
-    list_display = ("is_available", "pk")
+    list_display = (
+        "pk",
+        "is_available",
+    )
 
 
 class TimeSlotAdmin(admin.ModelAdmin):
@@ -54,7 +57,6 @@ class TreadmillAdmin(MachineAdmin):
 @admin.register(TreadmillTimeSlot)
 class TreadmillTimeSlotAdmin(TimeSlotAdmin):
     list_filter = TimeSlotAdmin.list_filter + ["treadmill"]
-    search_fields = TimeSlotAdmin.search_fields + ("treadmill__name",)
 
 
 @admin.register(Cycle)
@@ -65,4 +67,3 @@ class CycleAdmin(MachineAdmin):
 @admin.register(CycleTimeSlot)
 class CycleTimeSlotAdmin(TimeSlotAdmin):
     list_filter = TimeSlotAdmin.list_filter + ["cycle"]
-    search_fields = TimeSlotAdmin.search_fields + ("cycle__name",)
