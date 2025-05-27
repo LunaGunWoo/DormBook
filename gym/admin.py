@@ -12,7 +12,7 @@ def toggle_availability(modeladmin, request, queryset):
 
 class MachineAdmin(admin.ModelAdmin):
     actions = [toggle_availability]
-    list_display = ("is_available",)
+    list_display = ("is_available", "pk")
 
 
 class TimeSlotAdmin(admin.ModelAdmin):
