@@ -17,7 +17,7 @@ class Machine(models.Model):
         abstract = True
 
     def __str__(self) -> str:
-        return self.pk
+        return str(self.pk)
 
 
 class TimeSlot(models.Model):
