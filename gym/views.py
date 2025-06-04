@@ -89,6 +89,7 @@ class BaseTimeSlotBookAPIView(generics.GenericAPIView):
         kwargs.setdefault("context", self.get_serializer_context())
 
         if hasattr(serializer_class, "timeslot_model"):
+
             serializer_class.timeslot_model = self.model_class
 
         return serializer_class(*args, **kwargs)
@@ -107,9 +108,12 @@ class BaseTimeSlotBookAPIView(generics.GenericAPIView):
     )
     def post(self, request, pk):
         machine_instance = get_object_or_404(self.machine_model_class, pk=pk)
+
+        machine_display_name = str(machine_instance)
+
         if not machine_instance.is_available:
             return Response(
-                {"error": f"{machine_instance.name}은(는) 현재 사용 불가능합니다."},
+                {"error": f"{machine_display_name}은(는) 현재 사용 불가능합니다."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -193,7 +197,8 @@ class BaseTimeSlotBookAPIView(generics.GenericAPIView):
                 status=status.HTTP_409_CONFLICT,
             )
         except Exception as e:
-            print(f"Error during {self.machine_fk_field} booking: {e}")
+
+            print(f"Error during {self.machine_model_class.__name__} booking: {e}")
             return Response(
                 {"error": "예약 처리 중 예측하지 못한 오류가 발생했습니다."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -221,6 +226,7 @@ class TreadmillTimeSlotListAPIView(BaseTimeSlotListAPIView):
     operation_id="book_treadmill_slot",
 )
 class TreadmillTimeSlotBookAPIView(BaseTimeSlotBookAPIView):
+    queryset = TreadmillTimeSlot.objects.none()
     serializer_class = BookTreadmillTimeSlotSerializer
     list_serializer_class = ListTreadmillTimeSlotSerializer
     model_class = TreadmillTimeSlot
@@ -249,6 +255,7 @@ class CycleTimeSlotListAPIView(BaseTimeSlotListAPIView):
     operation_id="book_cycle_slot",
 )
 class CycleTimeSlotBookAPIView(BaseTimeSlotBookAPIView):
+    queryset = CycleTimeSlot.objects.none()
     serializer_class = BookCycleTimeSlotSerializer
     list_serializer_class = ListCycleTimeSlotSerializer
     model_class = CycleTimeSlot

@@ -74,7 +74,7 @@ class ArcadeMachine(models.Model):
         default=True,
     )
 
-    @property  #
+    @property
     def is_using(self) -> bool:
         now = timezone.now()
         return ArcadeMachineTimeSlot.objects.filter(
