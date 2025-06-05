@@ -69,29 +69,30 @@ class BaseBookTimeSlotSerializer(serializers.Serializer):
             )
 
         request_user = request.user
-        start_time = data["start_time"]
-        query_date = start_time.date()
+        start_time_of_slot_being_booked = data["start_time"]
+
+        query_date_for_slot = start_time_of_slot_being_booked.date()
         day_start = timezone.make_aware(
-            datetime.combine(query_date, datetime.min.time()),
+            datetime.combine(query_date_for_slot, datetime.min.time()),
             timezone.get_default_timezone(),
         )
         day_end = day_start + timedelta(days=1)
 
-        user_actions_count_today = (
+        user_actions_count_for_slot_day = (
             self.timeslot_model.objects.filter(
                 user=request_user,
-                booked_at__gte=day_start,
-                booked_at__lt=day_end,
+                start_time__gte=day_start,
+                start_time__lt=day_end,
             )
             .values("booked_at")
             .distinct()
             .count()
         )
 
-        if user_actions_count_today >= MAX_BOOKING_ACTIONS_PER_DAY_GYM:
+        if user_actions_count_for_slot_day >= MAX_BOOKING_ACTIONS_PER_DAY_GYM:
             raise serializers.ValidationError(
                 f"하루에 최대 {MAX_BOOKING_ACTIONS_PER_DAY_GYM}번의 예약 행동만 가능합니다. "
-                f"이미 {user_actions_count_today}번 예약하셨습니다."
+                f"이미 {user_actions_count_for_slot_day}번 예약하셨습니다."
             )
         return data
 

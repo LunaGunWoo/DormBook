@@ -78,6 +78,11 @@ class BaseTimeSlotListAPIView(generics.ListAPIView):
 
 class BaseTimeSlotBookAPIView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
+    # queryset을 None 또는 빈 쿼리셋으로 설정합니다.
+    # drf-yasg가 GenericAPIView에서 queryset을 요구하는 경우가 있으나,
+    # 실제 POST 요청 처리 시에는 get_object나 get_queryset을 직접 사용하지 않으므로
+    # 스키마 생성 목적으로 빈 쿼리셋을 제공합니다.
+    # 각 하위 클래스에서 model_class에 맞게 objects.none()을 지정합니다.
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -89,7 +94,18 @@ class BaseTimeSlotBookAPIView(generics.GenericAPIView):
         kwargs.setdefault("context", self.get_serializer_context())
 
         if hasattr(serializer_class, "timeslot_model"):
-
+            # serializer_class.timeslot_model = self.model_class
+            # model_class는 view 자체의 속성이므로 serializer에 직접 할당하지 않습니다.
+            # serializer 내부에서 timeslot_model을 필요로 한다면,
+            # 해당 serializer의 timeslot_model을 직접 설정하거나,
+            # context를 통해 전달하는 방식을 고려해야 합니다.
+            # 현재 BaseBookTimeSlotSerializer는 timeslot_model을 외부에서 설정받도록 되어있으므로,
+            # 이 부분은 그대로 두거나, 혹은 view의 model_class를 사용하도록 수정할 수 있습니다.
+            # 여기서는 BaseBookTimeSlotSerializer의 기존 로직을 존중하여,
+            # get_serializer 호출 시 serializer_class.timeslot_model = self.model_class
+            # 부분을 유지하거나, 혹은 serializer_class.timeslot_model이 None일 경우
+            # self.model_class를 사용하도록 serializer 내부 로직을 수정할 수 있습니다.
+            # 현재 구조에서는 view의 model_class를 serializer에 전달하는 것이 명확해 보입니다.
             serializer_class.timeslot_model = self.model_class
 
         return serializer_class(*args, **kwargs)
@@ -108,7 +124,6 @@ class BaseTimeSlotBookAPIView(generics.GenericAPIView):
     )
     def post(self, request, pk):
         machine_instance = get_object_or_404(self.machine_model_class, pk=pk)
-
         machine_display_name = str(machine_instance)
 
         if not machine_instance.is_available:
@@ -189,7 +204,7 @@ class BaseTimeSlotBookAPIView(generics.GenericAPIView):
 
         except ValueError as e:
             return Response({"error": str(e)}, status=status.HTTP_409_CONFLICT)
-        except IntegrityError:
+        except IntegrityError:  # 이미 IntegrityError를 import하고 있습니다.
             return Response(
                 {
                     "error": "데이터 저장 중 충돌이 발생했습니다. 잠시 후 다시 시도해주세요."
@@ -197,7 +212,7 @@ class BaseTimeSlotBookAPIView(generics.GenericAPIView):
                 status=status.HTTP_409_CONFLICT,
             )
         except Exception as e:
-
+            # machine_fk_field 대신 self.machine_model_class.__name__ 등을 사용하여 로깅
             print(f"Error during {self.machine_model_class.__name__} booking: {e}")
             return Response(
                 {"error": "예약 처리 중 예측하지 못한 오류가 발생했습니다."},
@@ -217,7 +232,7 @@ class TreadmillTimeSlotListAPIView(BaseTimeSlotListAPIView):
     machine_fk_field = "treadmill"
 
 
-@swagger_auto_schema(
+@swagger_auto_schema(  # 이 데코레이터는 클래스에 적용되어야 합니다.
     request_body=BookTreadmillTimeSlotSerializer,
     responses={
         200: ListTreadmillTimeSlotSerializer(many=True),
@@ -226,7 +241,7 @@ class TreadmillTimeSlotListAPIView(BaseTimeSlotListAPIView):
     operation_id="book_treadmill_slot",
 )
 class TreadmillTimeSlotBookAPIView(BaseTimeSlotBookAPIView):
-    queryset = TreadmillTimeSlot.objects.none()
+    queryset = TreadmillTimeSlot.objects.none()  # 추가된 부분
     serializer_class = BookTreadmillTimeSlotSerializer
     list_serializer_class = ListTreadmillTimeSlotSerializer
     model_class = TreadmillTimeSlot
@@ -246,7 +261,7 @@ class CycleTimeSlotListAPIView(BaseTimeSlotListAPIView):
     machine_fk_field = "cycle"
 
 
-@swagger_auto_schema(
+@swagger_auto_schema(  # 이 데코레이터는 클래스에 적용되어야 합니다.
     request_body=BookCycleTimeSlotSerializer,
     responses={
         200: ListCycleTimeSlotSerializer(many=True),
@@ -255,7 +270,7 @@ class CycleTimeSlotListAPIView(BaseTimeSlotListAPIView):
     operation_id="book_cycle_slot",
 )
 class CycleTimeSlotBookAPIView(BaseTimeSlotBookAPIView):
-    queryset = CycleTimeSlot.objects.none()
+    queryset = CycleTimeSlot.objects.none()  # 추가된 부분
     serializer_class = BookCycleTimeSlotSerializer
     list_serializer_class = ListCycleTimeSlotSerializer
     model_class = CycleTimeSlot
